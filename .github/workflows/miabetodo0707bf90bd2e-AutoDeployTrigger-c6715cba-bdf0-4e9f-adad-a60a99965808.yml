@@ -1,0 +1,47 @@
+name: Trigger auto deployment for miabetodo0707bf90bd2e
+
+# When this action will be executed
+on:
+  # Automatically trigger it when detected changes in repo
+  push:
+    branches: 
+      [ main ]
+    paths:
+    - '//**'
+    - '.github/workflows/miabetodo0707bf90bd2e-AutoDeployTrigger-c6715cba-bdf0-4e9f-adad-a60a99965808.yml'
+
+  # Allow manual trigger 
+  workflow_dispatch:      
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    permissions: 
+      id-token: write #This is required for requesting the OIDC JWT Token
+      contents: read #Required when GH token is used to authenticate with private repo
+
+    steps:
+      - name: Checkout to the branch
+        uses: actions/checkout@v2
+
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          client-id: ${{ secrets.MIABETODO0707BF90BD2E_AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.MIABETODO0707BF90BD2E_AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.MIABETODO0707BF90BD2E_AZURE_SUBSCRIPTION_ID }}
+
+      - name: Build and push container image to registry
+        uses: azure/container-apps-deploy-action@v2
+        with:
+          appSourcePath: ${{ github.workspace }} 
+          registryUrl: 
+          registryUsername: ${{ secrets.MIABETODO0707BF90BD2E_REGISTRY_USERNAME }}
+          registryPassword: ${{ secrets.MIABETODO0707BF90BD2E_REGISTRY_PASSWORD }}
+          containerAppName: miabetodo0707bf90bd2e
+          resourceGroup: miabetodo0707bf90
+          imageToBuild: default/miabetodo0707bf90bd2e:${{ github.sha }}
+          _buildArgumentsKey_: |
+            _buildArgumentsValues_
+
+
